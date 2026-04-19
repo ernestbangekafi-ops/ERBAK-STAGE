@@ -1,0 +1,1628 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ERBAK STAGE - Gestion de Stages</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #ec4899;
+            --accent: #8b5cf6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --gray: #64748b;
+            --glass: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+            min-height: 100vh;
+            color: var(--light);
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            max-width: 480px;
+            margin: 0 auto;
+            min-height: 100vh;
+            position: relative;
+            background: linear-gradient(180deg, rgba(99, 102, 241, 0.1) 0%, transparent 50%);
+        }
+
+        /* Header */
+        .header {
+            padding: 20px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            border-radius: 0 0 30px 30px;
+            box-shadow: 0 10px 40px rgba(99, 102, 241, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo i {
+            font-size: 28px;
+        }
+
+        .user-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: var(--glass);
+            border: 2px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .user-avatar:active {
+            transform: scale(0.95);
+        }
+
+        .progress-card {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 20px;
+            margin-top: 10px;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .progress-title {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .progress-value {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #fff, var(--secondary));
+            border-radius: 10px;
+            transition: width 0.5s ease;
+            width: 65%;
+        }
+
+        .stats-row {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            flex: 1;
+            text-align: center;
+            padding: 15px;
+            background: var(--glass);
+            border-radius: 15px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .stat-number {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--secondary);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.7;
+            margin-top: 5px;
+        }
+
+        /* Navigation */
+        .nav-tabs {
+            display: flex;
+            padding: 20px;
+            gap: 10px;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+
+        .nav-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .nav-tab {
+            padding: 12px 24px;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 25px;
+            color: var(--light);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.3s;
+        }
+
+        .nav-tab.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        }
+
+        /* Content Sections */
+        .content-section {
+            padding: 0 20px 100px;
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Daily Entry Card */
+        .entry-card {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 25px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .date-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--primary);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-label {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: block;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 15px;
+            background: rgba(15, 23, 42, 0.5);
+            border: 2px solid var(--glass-border);
+            border-radius: 15px;
+            color: var(--light);
+            font-size: 15px;
+            transition: all 0.3s;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(15, 23, 42, 0.8);
+        }
+
+        textarea.input-field {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .time-inputs {
+            display: flex;
+            gap: 15px;
+        }
+
+        .time-inputs .input-group {
+            flex: 1;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            border: none;
+            border-radius: 16px;
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
+            transition: all 0.3s;
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+            box-shadow: 0 5px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(180deg, var(--primary), var(--secondary));
+            border-radius: 2px;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 25px;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -26px;
+            top: 24px;
+            width: 16px;
+            height: 16px;
+            background: var(--primary);
+            border-radius: 50%;
+            border: 3px solid var(--dark);
+            box-shadow: 0 0 0 3px var(--primary);
+        }
+
+        .timeline-date {
+            font-size: 13px;
+            color: var(--secondary);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .timeline-content h4 {
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .timeline-content p {
+            font-size: 14px;
+            opacity: 0.8;
+            line-height: 1.5;
+        }
+
+        .timeline-meta {
+            display: flex;
+            gap: 15px;
+            margin-top: 12px;
+            font-size: 13px;
+            opacity: 0.7;
+        }
+
+        .timeline-meta span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Report Section */
+        .report-card {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 25px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .report-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 36px;
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
+        }
+
+        .report-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .report-desc {
+            font-size: 14px;
+            opacity: 0.7;
+            margin-bottom: 20px;
+        }
+
+        .report-options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-btn {
+            padding: 15px;
+            background: rgba(15, 23, 42, 0.5);
+            border: 2px solid var(--glass-border);
+            border-radius: 12px;
+            color: var(--light);
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s;
+        }
+
+        .option-btn:hover {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .preview-box {
+            background: rgba(15, 23, 42, 0.8);
+            border: 2px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: left;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            display: none;
+        }
+
+        .preview-box.active {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; max-height: 0; }
+            to { opacity: 1; max-height: 300px; }
+        }
+
+        /* Settings */
+        .settings-group {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .settings-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--secondary);
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+
+        .setting-label {
+            font-size: 15px;
+        }
+
+        .toggle {
+            width: 50px;
+            height: 28px;
+            background: var(--gray);
+            border-radius: 14px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .toggle.active {
+            background: var(--success);
+        }
+
+        .toggle::after {
+            content: '';
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.3s;
+        }
+
+        .toggle.active::after {
+            transform: translateX(22px);
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 480px;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--glass-border);
+            padding: 15px 30px 25px;
+            display: flex;
+            justify-content: space-around;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            color: var(--gray);
+            text-decoration: none;
+            font-size: 12px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .nav-item i {
+            font-size: 22px;
+            transition: transform 0.3s;
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+        }
+
+        .nav-item.active i {
+            transform: translateY(-5px);
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--dark);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border: 1px solid var(--glass-border);
+            z-index: 2000;
+            opacity: 0;
+            transition: all 0.3s;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--success);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(5px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 30px;
+            width: 100%;
+            max-width: 400px;
+            animation: modalIn 0.3s ease;
+        }
+
+        @keyframes modalIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .modal-btn {
+            width: 100%;
+            padding: 15px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .modal-btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .modal-btn-secondary {
+            background: transparent;
+            color: var(--gray);
+            border: 2px solid var(--glass-border);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            opacity: 0.6;
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 15px;
+            color: var(--gray);
+        }
+
+        .empty-state p {
+            font-size: 14px;
+        }
+
+        /* Animations */
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .slide-up {
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-top">
+                <div class="logo">
+                    <i class="fas fa-rocket"></i>
+                    ERBAK STAGE
+                </div>
+                <div class="user-avatar" onclick="showProfile()">
+                    <i class="fas fa-user"></i>
+                </div>
+            </div>
+            <div class="progress-card">
+                <div class="progress-header">
+                    <span class="progress-title">Progression du Stage</span>
+                    <span class="progress-value" id="progressPercent">65%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressBar"></div>
+                </div>
+                <div class="stats-row">
+                    <div class="stat-item">
+                        <div class="stat-number" id="daysCount">26</div>
+                        <div class="stat-label">Jours</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="hoursCount">208</div>
+                        <div class="stat-label">Heures</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="tasksCount">18</div>
+                        <div class="stat-label">Tâches</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="nav-tabs">
+            <div class="nav-tab active" onclick="switchTab('daily')">Aujourd'hui</div>
+            <div class="nav-tab" onclick="switchTab('history')">Historique</div>
+            <div class="nav-tab" onclick="switchTab('report')">Rapport</div>
+            <div class="nav-tab" onclick="switchTab('settings')">Paramètres</div>
+        </div>
+
+        <!-- Daily Entry Section -->
+        <div class="content-section active" id="daily-section">
+            <div class="entry-card slide-up">
+                <div class="date-badge">
+                    <i class="fas fa-calendar-day"></i>
+                    <span id="currentDate">19 Avril 2026</span>
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">Titre de la journée</label>
+                    <input type="text" class="input-field" id="entryTitle" placeholder="Ex: Développement du module API">
+                </div>
+
+                <div class="time-inputs">
+                    <div class="input-group">
+                        <label class="input-label">Heure début</label>
+                        <input type="time" class="input-field" id="startTime" value="09:00">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Heure fin</label>
+                        <input type="time" class="input-field" id="endTime" value="17:00">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">Tâches accomplies</label>
+                    <textarea class="input-field" id="tasksDone" placeholder="Décrivez les tâches réalisées aujourd'hui...
+- Réunion avec l'équipe
+- Codage du backend
+- Tests unitaires"></textarea>
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">Compétences développées</label>
+                    <input type="text" class="input-field" id="skills" placeholder="Ex: React, Node.js, Gestion de projet">
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">Difficultés rencontrées</label>
+                    <textarea class="input-field" id="challenges" placeholder="Décrivez les défis et comment vous les avez surmontés..."></textarea>
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">Description détaillée</label>
+                    <textarea class="input-field" id="description" placeholder="Décrivez en détail votre journée de stage, les rencontres, les observations, les apprentissages..."></textarea>
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">📷 Photo / Pièce jointe</label>
+                    <input type="file" class="input-field" id="photoInput" accept="image/*" onchange="handlePhotoUpload(this)">
+                    <div id="photoPreview" style="margin-top:10px; display:none;">
+                        <img id="previewImg" style="max-width:100%; border-radius:10px; border:2px solid var(--primary);">
+                    </div>
+                </div>
+
+                <button class="btn-primary" onclick="saveEntry()">
+                    <i class="fas fa-save"></i>
+                    Enregistrer la journée
+                </button>
+            </div>
+        </div>
+
+        <!-- History Section -->
+        <div class="content-section" id="history-section">
+            <h3 class="section-title">
+                <i class="fas fa-history"></i>
+                Historique des entrées
+            </h3>
+            <div class="timeline" id="timeline">
+                <!-- Timeline items will be inserted here -->
+            </div>
+        </div>
+
+        <!-- Report Section -->
+        <div class="content-section" id="report-section">
+            <h3 class="section-title">
+                <i class="fas fa-file-alt"></i>
+                Génération de Rapport
+            </h3>
+
+            <div class="report-card">
+                <div class="report-icon">
+                    <i class="fas fa-magic"></i>
+                </div>
+                <div class="report-title">Rapport Automatique</div>
+                <div class="report-desc">Générez votre rapport de stage complet basé sur vos entrées quotidiennes</div>
+
+                <div class="report-options">
+                    <button class="option-btn" onclick="generateReport('structured')" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.3), rgba(236, 72, 153, 0.3)); border-color: var(--primary);">
+                        <i class="fas fa-file-alt"></i>
+                        <strong>Rapport Complet Structuré</strong>
+                        <small style="display:block; opacity:0.7; margin-top:5px;">Introduction + Entreprise + Activités + Évaluations + Conclusion</small>
+                    </button>
+                    <button class="option-btn" onclick="generateReport('summary')">
+                        <i class="fas fa-list"></i>
+                        Vue d'ensemble
+                    </button>
+                    <button class="option-btn" onclick="generateReport('detailed')">
+                        <i class="fas fa-file-word"></i>
+                        Rapport Détaillé
+                    </button>
+                </div>
+
+                <div class="preview-box" id="reportPreview"></div>
+            </div>
+
+            <button class="btn-primary" onclick="downloadReport()" style="margin-top: 10px;">
+                <i class="fas fa-download"></i>
+                Télécharger le Rapport
+            </button>
+        </div>
+
+        <!-- Settings Section -->
+        <div class="content-section" id="settings-section">
+            <h3 class="section-title">
+                <i class="fas fa-cog"></i>
+                Paramètres
+            </h3>
+
+            <div class="settings-group">
+                <div class="settings-title">Informations du Stage</div>
+                <div class="input-group" style="margin-bottom: 15px;">
+                    <label class="input-label">Nom de l'entreprise</label>
+                    <input type="text" class="input-field" id="companyName" placeholder="Nom de l'entreprise">
+                </div>
+                <div class="input-group" style="margin-bottom: 15px;">
+                    <label class="input-label">Poste occupé</label>
+                    <input type="text" class="input-field" id="position" placeholder="Ex: Développeur Web Junior">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Période totale (semaines)</label>
+                    <input type="number" class="input-field" id="totalWeeks" value="8" min="1" max="52">
+                </div>
+            </div>
+
+            <div class="settings-group">
+                <div class="settings-title">Notifications</div>
+                <div class="setting-item">
+                    <span class="setting-label">Rappel quotidien</span>
+                    <div class="toggle active" onclick="toggleSwitch(this)"></div>
+                </div>
+                <div class="setting-item">
+                    <span class="setting-label">Rapport hebdomadaire</span>
+                    <div class="toggle active" onclick="toggleSwitch(this)"></div>
+                </div>
+                <div class="setting-item">
+                    <span class="setting-label">Fin de stage</span>
+                    <div class="toggle" onclick="toggleSwitch(this)"></div>
+                </div>
+            </div>
+
+            <div class="settings-group">
+                <div class="settings-title">Préférences</div>
+                <div class="setting-item">
+                    <span class="setting-label">Mode sombre</span>
+                    <div class="toggle active" onclick="toggleSwitch(this)"></div>
+                </div>
+                <div class="setting-item">
+                    <span class="setting-label">Sauvegarde cloud</span>
+                    <div class="toggle" onclick="toggleSwitch(this)"></div>
+                </div>
+            </div>
+
+            <div class="settings-group">
+                <div class="settings-title">👤 Profil de l'Étudiant</div>
+                <div class="input-group" style="margin-bottom: 15px;">
+                    <label class="input-label">Nom complet</label>
+                    <input type="text" class="input-field" id="studentName" placeholder="Nom et prénom">
+                </div>
+                <div class="input-group" style="margin-bottom: 15px;">
+                    <label class="input-label">Matricule / ID</label>
+                    <input type="text" class="input-field" id="studentId" placeholder="Numéro matricule">
+                </div>
+                <div class="input-group" style="margin-bottom: 15px;">
+                    <label class="input-label">Établissement</label>
+                    <input type="text" class="input-field" id="school" placeholder="Université / École">
+                </div>
+                <div class="input-group" style="margin-bottom: 15px;">
+                    <label class="input-label">Filière / Département</label>
+                    <input type="text" class="input-field" id="department" placeholder="Ex: Informatique de Gestion">
+                </div>
+                <div class="input-group" style="margin-bottom: 15px;">
+                    <label class="input-label">Niveau d'études</label>
+                    <input type="text" class="input-field" id="level" placeholder="Ex: Licence 3, Master 1">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Téléphone / Email</label>
+                    <input type="text" class="input-field" id="contact" placeholder="+243... / email@...">
+                </div>
+            </div>
+
+            <div class="settings-group">
+                <div class="settings-title">🏢 Attribution du Stage</div>
+                <div class="input-group" style="margin-bottom: 15px;">
+                    <label class="input-label">Entreprise / Organisation</label>
+                    <input type="text" class="input-field" id="companyName" placeholder="Nom de l'entreprise">
+                </div>
+                <div class="input-group" style="margin-bottom: 15px;">
+                    <label class="input-label">Service / Département</label>
+                    <input type="text" class="input-field" id="service" placeholder="Ex: Service Informatique">
+                </div>
+                <div class="input-group" style="margin-bottom: 15px;">
+                    <label class="input-label">Bureau / Localisation</label>
+                    <input type="text" class="input-field" id="office" placeholder="Ex: Bureau 205, 2ème étage">
+                </div>
+                <div class="input-group" style="margin-bottom: 15px;">
+                    <label class="input-label">Maître de stage (Tuteur)</label>
+                    <input type="text" class="input-field" id="tutorName" placeholder="Nom complet du tuteur">
+                </div>
+                <div class="input-group" style="margin-bottom: 15px;">
+                    <label class="input-label">Fonction du tuteur</label>
+                    <input type="text" class="input-field" id="tutorRole" placeholder="Ex: Directeur IT">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Contact du tuteur</label>
+                    <input type="text" class="input-field" id="tutorContact" placeholder="Email / Téléphone du tuteur">
+                </div>
+            </div>
+
+            <div class="settings-group">
+                <div class="settings-title">📝 Évaluations par le Tuteur</div>
+                <div style="background: rgba(99, 102, 241, 0.1); border: 1px solid var(--glass-border); border-radius: 12px; padding: 15px; margin-bottom: 15px;">
+                    <div style="font-weight: 600; margin-bottom: 10px; color: var(--secondary);">
+                        <i class="fas fa-clipboard-check"></i> Évaluation à Mi-Parcours
+                    </div>
+                    <div class="input-group" style="margin-bottom: 10px;">
+                        <label class="input-label" style="font-size: 12px;">Date d'évaluation</label>
+                        <input type="date" class="input-field" id="midEvalDate">
+                    </div>
+                    <div class="input-group" style="margin-bottom: 10px;">
+                        <label class="input-label" style="font-size: 12px;">Note /20</label>
+                        <input type="number" class="input-field" id="midEvalScore" min="0" max="20" placeholder="15">
+                    </div>
+                    <div class="input-group" style="margin-bottom: 10px;">
+                        <label class="input-label" style="font-size: 12px;">Compétences validées</label>
+                        <textarea class="input-field" id="midEvalSkills" placeholder="Listez les compétences acquises..." style="min-height: 60px;"></textarea>
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label" style="font-size: 12px;">Observations du tuteur</label>
+                        <textarea class="input-field" id="midEvalComments" placeholder="Commentaires et recommandations..." style="min-height: 60px;"></textarea>
+                    </div>
+                </div>
+
+                <div style="background: rgba(236, 72, 153, 0.1); border: 1px solid var(--glass-border); border-radius: 12px; padding: 15px;">
+                    <div style="font-weight: 600; margin-bottom: 10px; color: var(--secondary);">
+                        <i class="fas fa-award"></i> Évaluation Finale
+                    </div>
+                    <div class="input-group" style="margin-bottom: 10px;">
+                        <label class="input-label" style="font-size: 12px;">Date d'évaluation finale</label>
+                        <input type="date" class="input-field" id="finalEvalDate">
+                    </div>
+                    <div class="input-group" style="margin-bottom: 10px;">
+                        <label class="input-label" style="font-size: 12px;">Note finale /20</label>
+                        <input type="number" class="input-field" id="finalEvalScore" min="0" max="20" placeholder="17">
+                    </div>
+                    <div class="input-group" style="margin-bottom: 10px;">
+                        <label class="input-label" style="font-size: 12px;">Appréciation générale</label>
+                        <select class="input-field" id="finalEvalAppreciation">
+                            <option value="">Sélectionnez...</option>
+                            <option value="Excellent">Excellent</option>
+                            <option value="Très Bien">Très Bien</option>
+                            <option value="Bien">Bien</option>
+                            <option value="Passable">Passable</option>
+                            <option value="Insuffisant">Insuffisant</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label" style="font-size: 12px;">Commentaires finaux</label>
+                        <textarea class="input-field" id="finalEvalComments" placeholder="Appréciation globale du stage..." style="min-height: 80px;"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-group">
+                <div class="settings-title">✍️ Signature</div>
+                <div style="background: white; border-radius: 12px; padding: 10px; margin-bottom: 15px;">
+                    <canvas id="signatureCanvas" width="300" height="150" style="width:100%; border: 2px dashed var(--gray); border-radius: 8px; cursor: crosshair;"></canvas>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button type="button" class="option-btn" onclick="clearSignature()" style="flex: 1;">
+                        <i class="fas fa-eraser"></i> Effacer
+                    </button>
+                    <button type="button" class="option-btn" onclick="saveSignature()" style="flex: 1;">
+                        <i class="fas fa-save"></i> Sauvegarder
+                    </button>
+                </div>
+                <input type="hidden" id="signatureData">
+            </div>
+
+            <div class="settings-group" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(236, 72, 153, 0.2) 100%);">
+                <div class="settings-title" style="color: #fff; text-align: center; font-size: 18px;">À propos</div>
+                <div style="text-align: center; padding: 20px; font-size: 14px; line-height: 1.8; opacity: 0.9;">
+                    <div style="font-size: 16px; font-weight: 600; margin-bottom: 15px; color: #ec4899;">
+                        <i class="fas fa-code"></i> Conçue par Ernest BANGE KAFI
+                    </div>
+                    <p style="margin-bottom: 15px;">
+                        Un digne fils du secteur de <strong>Karawa</strong>, territoire de <strong>Businga</strong>, 
+                        province du <strong>Nord-Ubangi</strong>, en <strong>RDC</strong>.
+                    </p>
+                    <p style="font-style: italic; opacity: 0.8; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 15px;">
+                        Cette application vise à aider les étudiants à accomplir facilement leur stage 
+                        et à produire sans contrainte leur rapport de stage de manière automatique, 
+                        en suivant les activités journalières réalisées pendant le stage.
+                    </p>
+                    <div style="margin-top: 15px; font-size: 12px; opacity: 0.6;">
+                        <i class="fas fa-heart" style="color: #ec4899;"></i> 
+                        Made with love for students
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn-primary" onclick="saveSettings()">
+                <i class="fas fa-check"></i>
+                Sauvegarder
+            </button>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <div class="bottom-nav">
+            <div class="nav-item active" onclick="switchTab('daily')">
+                <i class="fas fa-plus-circle"></i>
+                <span>Ajouter</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('history')">
+                <i class="fas fa-clock"></i>
+                <span>Historique</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('report')">
+                <i class="fas fa-file-export"></i>
+                <span>Rapport</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('settings')">
+                <i class="fas fa-sliders-h"></i>
+                <span>Réglages</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modal">
+        <div class="modal">
+            <div class="modal-title" id="modalTitle">Titre</div>
+            <div id="modalContent"></div>
+            <button class="modal-btn modal-btn-primary" onclick="closeModal()">Fermer</button>
+        </div>
+    </div>
+
+    <script>
+        // Data Storage
+        let entries = JSON.parse(localStorage.getItem('stageEntries')) || [];
+        let settings = JSON.parse(localStorage.getItem('stageSettings')) || {
+            company: '',
+            position: '',
+            totalWeeks: 8
+        };
+        let currentReport = '';
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateDate();
+            loadSettings();
+            updateStats();
+            renderTimeline();
+        });
+
+        // Update current date
+        function updateDate() {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const today = new Date().toLocaleDateString('fr-FR', options);
+            document.getElementById('currentDate').textContent = today;
+        }
+
+        // Tab Switching
+        function switchTab(tab) {
+            // Update nav tabs
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Update bottom nav
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach((item, index) => {
+                const tabs = ['daily', 'history', 'report', 'settings'];
+                if (tabs[index] === tab) item.classList.add('active');
+            });
+
+            // Show section
+            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+            document.getElementById(tab + '-section').classList.add('active');
+
+            if (tab === 'history') renderTimeline();
+        }
+
+        // Save Entry
+        function saveEntry() {
+            const title = document.getElementById('entryTitle').value;
+            const startTime = document.getElementById('startTime').value;
+            const endTime = document.getElementById('endTime').value;
+            const tasks = document.getElementById('tasksDone').value;
+            const skills = document.getElementById('skills').value;
+            const challenges = document.getElementById('challenges').value;
+            const description = document.getElementById('description').value;
+
+            if (!title || !tasks) {
+                showToast('Veuillez remplir les champs obligatoires', 'error');
+                return;
+            }
+
+            const photoInput = document.getElementById('photoInput');
+            let photoData = '';
+            if (photoInput.files && photoInput.files[0]) {
+                const reader = new FileReader();
+                reader.readAsDataURL(photoInput.files[0]);
+                // Note: In real app, handle async properly
+            }
+
+            const entry = {
+                id: Date.now(),
+                date: new Date().toISOString(),
+                title,
+                startTime,
+                endTime,
+                tasks,
+                skills,
+                challenges,
+                description,
+                hours: calculateHours(startTime, endTime)
+            };
+
+            entries.unshift(entry);
+            localStorage.setItem('stageEntries', JSON.stringify(entries));
+
+            // Clear form
+            document.getElementById('entryTitle').value = '';
+            document.getElementById('tasksDone').value = '';
+            document.getElementById('skills').value = '';
+            document.getElementById('challenges').value = '';
+            document.getElementById('description').value = '';
+
+            updateStats();
+            showToast('Entrée sauvegardée avec succès !', 'success');
+        }
+
+        // Calculate hours
+        function calculateHours(start, end) {
+            const startDate = new Date(`2000-01-01T${start}`);
+            const endDate = new Date(`2000-01-01T${end}`);
+            const diff = (endDate - startDate) / 1000 / 60 / 60;
+            return diff > 0 ? diff : diff + 24;
+        }
+
+        // Update Statistics
+        function updateStats() {
+            const totalDays = entries.length;
+            const totalHours = entries.reduce((sum, e) => sum + (e.hours || 8), 0);
+            const totalTasks = entries.reduce((sum, e) => {
+                return sum + (e.tasks ? e.tasks.split('\n').filter(t => t.trim()).length : 0);
+            }, 0);
+
+            const totalDaysRequired = settings.totalWeeks * 5;
+            const progress = Math.min((totalDays / totalDaysRequired) * 100, 100);
+
+            document.getElementById('daysCount').textContent = totalDays;
+            document.getElementById('hoursCount').textContent = Math.round(totalHours);
+            document.getElementById('tasksCount').textContent = totalTasks;
+            document.getElementById('progressPercent').textContent = Math.round(progress) + '%';
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        // Render Timeline
+        function renderTimeline() {
+            const timeline = document.getElementById('timeline');
+
+            if (entries.length === 0) {
+                timeline.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-clipboard-list"></i>
+                        <p>Aucune entrée pour le moment.<br>Commencez à tracker votre stage !</p>
+                    </div>
+                `;
+                return;
+            }
+
+            timeline.innerHTML = entries.map(entry => {
+                const date = new Date(entry.date);
+                const dateStr = date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
+                const dayName = date.toLocaleDateString('fr-FR', { weekday: 'long' });
+
+                return `
+                    <div class="timeline-item">
+                        <div class="timeline-date">${dayName} ${dateStr}</div>
+                        <div class="timeline-content">
+                            <h4>${entry.title}</h4>
+                            <p>${entry.tasks.substring(0, 100)}${entry.tasks.length > 100 ? '...' : ''}</p>
+                        </div>
+                        <div class="timeline-meta">
+                            <span><i class="fas fa-clock"></i> ${entry.startTime} - ${entry.endTime}</span>
+                            <span><i class="fas fa-hourglass-half"></i> ${entry.hours}h</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Generate Report
+        function generateReport(type) {
+            const s = settings;
+            const totalHours = entries.reduce((sum, e) => sum + (e.hours || 8), 0);
+            const totalDays = entries.length;
+
+            let report = '';
+
+            if (type === 'structured') {
+                // NEW: Complete structured report with all sections
+                report = `═══════════════════════════════════════════════════════════════
+                    RAPPORT DE STAGE
+                    ${s.studentName || '[Nom de l'étudiant]'}
+                    ${s.school || '[Établissement]'}
+                    ═══════════════════════════════════════════════════════════════
+
+1. INTRODUCTION
+${'─'.repeat(60)}
+
+Étudiant : ${s.studentName || '...'}
+Matricule : ${s.studentId || '...'}
+Établissement : ${s.school || '...'}
+Département : ${s.department || '...'}
+Niveau : ${s.level || '...'}
+Contact : ${s.contact || '...'}
+
+Période de stage : ${totalDays} jours (${totalHours} heures)
+Entreprise d'accueil : ${s.company || '...'}
+Service : ${s.service || '...'}
+Bureau : ${s.office || '...'}
+
+Maître de stage : ${s.tutorName || '...'}
+Fonction : ${s.tutorRole || '...'}
+Contact : ${s.tutorContact || '...'}
+
+2. DESCRIPTION DE L'ENTREPRISE
+${'─'.repeat(60)}
+
+Nom : ${s.company || '...'}
+Service d'accueil : ${s.service || '...'}
+Localisation : ${s.office || '...'}
+
+[Description détaillée de l'entreprise, sa mission, ses activités...]
+
+3. ACTIVITÉS RÉALISÉES (JOURNAL DE BORD)
+${'─'.repeat(60)}
+
+${entries.map((e, i) => `
+JOUR ${totalDays - i} - ${new Date(e.date).toLocaleDateString('fr-FR')}
+Titre : ${e.title}
+Horaires : ${e.startTime} à ${e.endTime} (${e.hours}h)
+
+Tâches réalisées :
+${e.tasks}
+
+Description détaillée :
+${e.description || 'Non spécifiée'}
+
+Compétences utilisées : ${e.skills || 'N/A'}
+Difficultés rencontrées : ${e.challenges || 'Aucune'}
+${'─'.repeat(40)}`).join('\n')}
+
+4. ÉVALUATION À MI-PARCOURS
+${'─'.repeat(60)}
+
+Date : ${s.midEvalDate || 'Non évalué'}
+Note : ${s.midEvalScore || '...'}/20
+
+Compétences validées :
+${s.midEvalSkills || '...'}
+
+Observations du tuteur :
+${s.midEvalComments || '...'}
+
+5. ÉVALUATION FINALE
+${'─'.repeat(60)}
+
+Date : ${s.finalEvalDate || 'Non évalué'}
+Note finale : ${s.finalEvalScore || '...'}/20
+Appréciation : ${s.finalEvalAppreciation || '...'}
+
+Commentaires du tuteur :
+${s.finalEvalComments || '...'}
+
+6. CONCLUSION
+${'─'.repeat(60)}
+
+Ce stage de ${totalDays} jours au sein de ${s.company || "l'entreprise"} a été une 
+expérience enrichissante. J'ai pu développer les compétences suivantes :
+
+${[...new Set(entries.flatMap(e => e.skills ? e.skills.split(',').map(s => s.trim()) : []))].map(c => `• ${c}`).join('\n')}
+
+Je remercie particulièrement ${s.tutorName || 'mon tuteur'} pour son accompagnement 
+et sa disponibilité tout au long de ce stage.
+
+Fait à ${s.office || '...'}, le ${new Date().toLocaleDateString('fr-FR')}
+
+Signature de l'étudiant : ${s.signature ? '[Signature enregistrée]' : '_________________'}
+Signature du tuteur : _________________
+
+═══════════════════════════════════════════════════════════════`;
+            } else if (type === 'summary') {
+                report = `RAPPORT DE STAGE - VUE D'ENSEMBLE
+${'='.repeat(50)}
+
+ÉTUDIANT : ${s.studentName || '[Non renseigné]'}
+ENTREPRISE : ${s.company || '[Non renseigné]'}
+TUTEUR : ${s.tutorName || '[Non renseigné]'}
+
+Période : ${totalDays} jours travaillés
+Total heures : ${totalHours}h
+
+OBJECTIFS ACCOMPLIS :
+${entries.map(e => `• ${e.title}`).join('\n')}
+
+COMPÉTENCES DÉVELOPPÉES :
+${[...new Set(entries.flatMap(e => e.skills ? e.skills.split(',').map(s => s.trim()) : []))].join(', ')}
+
+ÉVALUATION FINALE : ${s.finalEvalScore || '...'}/20 - ${s.finalEvalAppreciation || '...'}`;
+            } else if (type === 'detailed') {
+                report = `RAPPORT DE STAGE DÉTAILLÉ
+${'='.repeat(50)}
+
+INFORMATIONS GÉNÉRALES
+${'─'.repeat(40)}
+Étudiant : ${s.studentName || '...'}
+Entreprise : ${s.company || '...'}
+Poste : ${s.position || '...'}
+Tuteur : ${s.tutorName || '...'}
+Date début : ${entries.length > 0 ? new Date(entries[entries.length-1].date).toLocaleDateString('fr-FR') : 'N/A'}
+Date fin : ${entries.length > 0 ? new Date(entries[0].date).toLocaleDateString('fr-FR') : 'N/A'}
+
+DÉTAILS QUOTIDIENS :
+${entries.map((e, i) => `
+JOUR ${totalDays - i} - ${new Date(e.date).toLocaleDateString('fr-FR')}
+Titre : ${e.title}
+Horaires : ${e.startTime} à ${e.endTime} (${e.hours}h)
+
+Tâches :
+${e.tasks}
+
+Description :
+${e.description || 'Non spécifiée'}
+
+Compétences : ${e.skills || 'N/A'}
+Difficultés : ${e.challenges || 'Aucune'}
+${'─'.repeat(40)}`).join('\n')}`;
+            }
+
+            currentReport = report;
+            const preview = document.getElementById('reportPreview');
+            preview.textContent = report;
+            preview.classList.add('active');
+        }
+
+        function getWeekNumber(date) {
+            const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+            const dayNum = d.getUTCDay() || 7;
+            d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+            const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+            return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+        }
+
+        // Download Report
+        function downloadReport() {
+            if (!currentReport) {
+                showToast('Générez d\'abord un rapport', 'error');
+                return;
+            }
+
+            const blob = new Blob([currentReport], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Rapport_Stage_${new Date().toISOString().split('T')[0]}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('Rapport téléchargé !', 'success');
+        }
+
+        // Settings
+        function loadSettings() {
+            document.getElementById('studentName').value = settings.studentName || '';
+            document.getElementById('studentId').value = settings.studentId || '';
+            document.getElementById('school').value = settings.school || '';
+            document.getElementById('department').value = settings.department || '';
+            document.getElementById('level').value = settings.level || '';
+            document.getElementById('contact').value = settings.contact || '';
+            document.getElementById('companyName').value = settings.company || '';
+            document.getElementById('service').value = settings.service || '';
+            document.getElementById('office').value = settings.office || '';
+            document.getElementById('tutorName').value = settings.tutorName || '';
+            document.getElementById('tutorRole').value = settings.tutorRole || '';
+            document.getElementById('tutorContact').value = settings.tutorContact || '';
+            document.getElementById('position').value = settings.position || '';
+            document.getElementById('totalWeeks').value = settings.totalWeeks || 8;
+            document.getElementById('midEvalDate').value = settings.midEvalDate || '';
+            document.getElementById('midEvalScore').value = settings.midEvalScore || '';
+            document.getElementById('midEvalSkills').value = settings.midEvalSkills || '';
+            document.getElementById('midEvalComments').value = settings.midEvalComments || '';
+            document.getElementById('finalEvalDate').value = settings.finalEvalDate || '';
+            document.getElementById('finalEvalScore').value = settings.finalEvalScore || '';
+            document.getElementById('finalEvalAppreciation').value = settings.finalEvalAppreciation || '';
+            document.getElementById('finalEvalComments').value = settings.finalEvalComments || '';
+            document.getElementById('signatureData').value = settings.signature || '';
+        }
+
+        function saveSettings() {
+            settings = {
+                studentName: document.getElementById('studentName').value,
+                studentId: document.getElementById('studentId').value,
+                school: document.getElementById('school').value,
+                department: document.getElementById('department').value,
+                level: document.getElementById('level').value,
+                contact: document.getElementById('contact').value,
+                company: document.getElementById('companyName').value,
+                service: document.getElementById('service').value,
+                office: document.getElementById('office').value,
+                tutorName: document.getElementById('tutorName').value,
+                tutorRole: document.getElementById('tutorRole').value,
+                tutorContact: document.getElementById('tutorContact').value,
+                position: document.getElementById('position').value,
+                totalWeeks: parseInt(document.getElementById('totalWeeks').value) || 8,
+                midEvalDate: document.getElementById('midEvalDate').value,
+                midEvalScore: document.getElementById('midEvalScore').value,
+                midEvalSkills: document.getElementById('midEvalSkills').value,
+                midEvalComments: document.getElementById('midEvalComments').value,
+                finalEvalDate: document.getElementById('finalEvalDate').value,
+                finalEvalScore: document.getElementById('finalEvalScore').value,
+                finalEvalAppreciation: document.getElementById('finalEvalAppreciation').value,
+                finalEvalComments: document.getElementById('finalEvalComments').value,
+                signature: document.getElementById('signatureData').value
+            };
+            localStorage.setItem('stageSettings', JSON.stringify(settings));
+            updateStats();
+            showToast('Paramètres sauvegardés !', 'success');
+        }
+
+        // Toggle Switch
+        function toggleSwitch(element) {
+            element.classList.toggle('active');
+        }
+
+        // Toast Notification
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast ' + type;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // Modal
+        function showModal(title, content) {
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalContent').innerHTML = content;
+            document.getElementById('modal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+        }
+
+        // Signature handling
+        let isDrawing = false;
+        let signatureCanvas, ctx;
+
+        function initSignature() {
+            signatureCanvas = document.getElementById('signatureCanvas');
+            if (!signatureCanvas) return;
+            ctx = signatureCanvas.getContext('2d');
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+
+            signatureCanvas.addEventListener('mousedown', startDrawing);
+            signatureCanvas.addEventListener('mousemove', draw);
+            signatureCanvas.addEventListener('mouseup', stopDrawing);
+            signatureCanvas.addEventListener('mouseout', stopDrawing);
+
+            // Touch events for mobile
+            signatureCanvas.addEventListener('touchstart', handleTouch);
+            signatureCanvas.addEventListener('touchmove', handleTouch);
+            signatureCanvas.addEventListener('touchend', stopDrawing);
+        }
+
+        function startDrawing(e) {
+            isDrawing = true;
+            draw(e);
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            const rect = signatureCanvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+        }
+
+        function handleTouch(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const mouseEvent = new MouseEvent(e.type === 'touchstart' ? 'mousedown' : 'mousemove', {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            });
+            signatureCanvas.dispatchEvent(mouseEvent);
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+            ctx.beginPath();
+        }
+
+        function clearSignature() {
+            if (!ctx) return;
+            ctx.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height);
+            document.getElementById('signatureData').value = '';
+        }
+
+        function saveSignature() {
+            if (!signatureCanvas) return;
+            const dataURL = signatureCanvas.toDataURL();
+            document.getElementById('signatureData').value = dataURL;
+            showToast('Signature sauvegardée !', 'success');
+        }
+
+        // Photo handling
+        function handlePhotoUpload(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('previewImg').src = e.target.result;
+                    document.getElementById('photoPreview').style.display = 'block';
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function showProfile() {
+            showModal('Profil', `
+                <div style="text-align: center; padding: 20px;">
+                    <div style="width: 80px; height: 80px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; font-size: 36px;">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <h3 style="margin-bottom: 5px;">${settings.studentName || 'Stagiaire'}</h3>
+                    <p style="opacity: 0.7; font-size: 14px;">${settings.level || ''} - ${settings.department || ''}</p>
+                    <p style="opacity: 0.7; font-size: 14px;">${settings.school || ''}</p>
+                    <p style="opacity: 0.7; font-size: 14px;">${settings.company || 'Entreprise non définie'}</p>
+                    <p style="opacity: 0.7; font-size: 14px;">Tuteur: ${settings.tutorName || 'Non défini'}</p>
+                </div>
+            `);
+        }
+
+        // Initialize signature on load
+        setTimeout(initSignature, 1000);
+    </script>
+</body>
+</html>
